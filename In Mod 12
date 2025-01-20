@@ -1,0 +1,41 @@
+# Function to generate bracelets with a different modulo
+def generate_bracelet_modulo(a, b, mod):
+    """Generate a number bracelet sequence with a given modulo."""
+    sequence = [a, b]
+    seen_pairs = {(a, b)}
+    while True:
+        next_num = (sequence[-1] + sequence[-2]) % mod  # Sum modulo given number
+        if (sequence[-1], next_num) in seen_pairs:  # Cycle detected
+            break
+        sequence.append(next_num)
+        seen_pairs.add((sequence[-2], next_num))
+    return tuple(sequence)  # Convert to tuple for uniqueness checking
+
+# Generate all bracelets with numbers < 12
+mod = 12
+bracelet_set_mod12 = set()
+for i in range(mod):
+    for j in range(i, mod):
+        bracelet = generate_bracelet_modulo(i, j, mod)
+        bracelet_set_mod12.add(bracelet)
+
+# Identify fundamental cycles by rotational equivalence
+unique_bracelet_classes_mod12 = set()
+for bracelet in bracelet_set_mod12:
+    min_rotation = min(tuple(bracelet[i:] + bracelet[:i]) for i in range(len(bracelet)))
+    unique_bracelet_classes_mod12.add(min_rotation)
+
+# Classify bracelets by their cycle length
+bracelet_lengths_mod12 = {bracelet: len(bracelet) for bracelet in unique_bracelet_classes_mod12}
+
+# Identify representative bracelets for different cycle lengths
+representative_bracelets_mod12 = {}
+for length in sorted(set(bracelet_lengths_mod12.values()), reverse=True):
+    for bracelet, cycle_length in bracelet_lengths_mod12.items():
+        if cycle_length == length:
+            representative_bracelets_mod12[length] = bracelet
+            break  # Take one example per category
+
+# Display results
+bracelet_df_mod12 = pd.DataFrame.from_dict(representative_bracelets_mod12, orient="index", columns=["Bracelet"])
+print(bracelet_df_mod12)
