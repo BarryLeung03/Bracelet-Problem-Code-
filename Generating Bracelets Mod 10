@@ -1,0 +1,41 @@
+import pandas as pd
+
+def generate_bracelet(a, b):
+    """Generate a number bracelet sequence from two starting numbers."""
+    sequence = [a, b]
+    seen_pairs = {(a, b)}
+    while True:
+        next_num = (sequence[-1] + sequence[-2]) % 10  # Sum modulo 10
+        if (sequence[-1], next_num) in seen_pairs:  # Cycle detected
+            break
+        sequence.append(next_num)
+        seen_pairs.add((sequence[-2], next_num))
+    return tuple(sequence)  # Convert to tuple for uniqueness checking
+
+# Generate all bracelets
+bracelet_set = set()
+for i in range(10):
+    for j in range(i, 10):
+        bracelet = generate_bracelet(i, j)
+        bracelet_set.add(bracelet)
+
+# Identify fundamental cycles by rotational equivalence
+unique_bracelet_classes = set()
+for bracelet in bracelet_set:
+    min_rotation = min(tuple(bracelet[i:] + bracelet[:i]) for i in range(len(bracelet)))
+    unique_bracelet_classes.add(min_rotation)
+
+# Classify bracelets by their cycle length
+bracelet_lengths = {bracelet: len(bracelet) for bracelet in unique_bracelet_classes}
+
+# Identify the six fundamental bracelets
+representative_bracelets = {}
+for length in [61, 21, 13, 5, 4, 2]:
+    for bracelet, cycle_length in bracelet_lengths.items():
+        if cycle_length == length:
+            representative_bracelets[length] = bracelet
+            break  # Take one example per category
+
+# Display results
+bracelet_df = pd.DataFrame.from_dict(representative_bracelets, orient="index", columns=["Bracelet"])
+print(bracelet_df)
